@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>走马灯效果</title>
+    <style>
+        .container {
+            max-width: 800px;
+            border-radius: 6px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, .3);
+            margin: 30px auto;
+            padding: 16px;
+        }
+        .carousel {
+            position: relative;
+            height: 200px;
+        }
+        .panels > a {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+
+            opacity: 0;
+            z-index: 0;
+        }
+        .panels > a.active {
+            opacity: 1;
+            z-index: 1;
+        } 
+        .panels > a:nth-child(even) {
+            background-color: lightblue;
+        }
+         .panels > a:nth-child(odd) {
+            background-color: #bfa;
+        }
+        .arrow {
+            position: absolute;
+            z-index: 100;
+            top: 50%;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(31, 45, 61, .11);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 去除点击箭头时的边框 */
+            outline: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: all .3s;
+        }
+        .arrows .arrow-pre {
+            left: 10px;
+            transform: translateX(-10px) translateY(-50%);
+        }
+        .carousel:hover .arrow-pre {
+            transform: translateX(0) translateY(-50%);
+            opacity: 1;
+        }
+        .arrows .arrow-next {
+            right: 10px;
+            transform: translateX(10px) translateY(-50%);
+        }
+        .carousel:hover .arrow-next {
+            transform: translateX(0) translateY(-50%);
+            opacity: 1;
+        }
+        .arrow::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-left: 1px solid #fff;
+            border-top: 1px solid #fff;
+            transform: rotate(-45deg);
+        } 
+        .arrow-next::before {
+            transform: rotate(135deg);
+        }
+        .indicators {
+            position: absolute;
+            z-index: 100;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+            /* width: 120px;
+            height: 10px;
+            background-color: red; */
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .indicators > li {
+            display: inline;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+        .indicators > li::before {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            border-radius: 6px;
+            background-color: #c0c4cc;
+            display: inline-block;
+            transition: all .3s;
+        }
+        .indicators > li.active::before {
+            background: #fff;
+        } 
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Carousel</h2>
+        <div class="carousel">  
+                <!-- 面板 -->
+            <div class="panels">
+                <a class="active" href="#1">1</a>
+                <a href="#2">2</a>
+                <a href="#3">3</a>
+                <a href="#4">4</a>
+            </div>
+                <!-- 箭头 -->
+            <div class="arrows">
+                <button class="arrow arrow-pre"></button>
+                <button class="arrow arrow-next"></button>
+            </div>
+            <ul class="indicators">
+                <li class="active"></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+
+    <script>
+        // js都要实现的功能
+        //     1. 点击 pre 展示上一页   设置 indicators 
+        //     2. 点击 next 展示下一页  设置 indicators
+        //     3.点击 indicators 展示第n页   设置 indicators  
+        const $ = s => document.querySelector(s)
+        const $$ = s => document.querySelectorAll(s)
+
+        const $pre = $('.carousel .arrow-pre')
+        const $next = $('.carousel .arrow-next')
+        const $$indicators = $$('.carousel .indicators > li')
+        const $$panels = $$('.carousel .panels > a')
+
+            //现在不可以将 .carousel .indicators .active 放在前面，因为需要遍历当前谁拥有 active
+        const getIndex = () => [...$$indicators].indexOf($('.carousel .indicators .active'))
+        // 加上 $$indicators.length ,是因为当 getIndex=0时，减一成为负数，
+        //但是 getIndex - 1 +$$indicators.length 超过 长度时，也会出错，所以要取余
+        const getPreIndex = () =>(getIndex() - 1 +$$indicators.length) % $$indicators.length
+        //加上 $$indicators.length也不错 ，但是会麻烦
+        const getNextIndex = () => (getIndex() + 1 +$$indicators.length) % $$indicators.length
+
+
+        const setPage = index => {
+            //以下两行相当于 tab 切换
+            $$panels.forEach($panel =>$panel.classList.remove('active'))
+            $$panels[index].classList.add('active')
+        }
+        const setIndicator = index => {
+            $$indicators.forEach($indicators =>$indicators.classList.remove('active'))
+            $$indicators[index].classList.add('active')
+        }
+
+        $pre.onclick = function() {
+            let index = getPreIndex() 
+            setPage(index)
+            setIndicator(index)
+        }
+        $next.onclick = function() {
+            let index = getNextIndex() 
+            setPage(index)
+            setIndicator(index)
+        }
+
+        $$indicators.forEach($indicator => $indicator.onclick = function(e) {
+            let index = [...$$indicators].indexOf(e.target)
+            console.log(index)
+            setIndicator(index)
+            setPage(index)
+        })
+
+
+    </script>
+
+
+
+
+</body>
+</html>
